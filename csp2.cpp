@@ -11,7 +11,7 @@
 using namespace std;
 
 int V ;
-
+fstream fout;
 bool revise(vector<vector<int> > &graph,vector<vector<int> > &domains,int x,int y)
 {
 	int i,j;
@@ -71,7 +71,11 @@ void printSolution(int color[])
 {
     cout<<"Solutions Exists with the Following Assignment : "<<endl;
     for (int i = 0; i < V; i++)
-      cout<<color[i]<<" ";
+    {
+    	fout<<color[i]<<" ";
+    	cout<<color[i]<<" ";
+    }
+    fout<<endl;
     cout<<endl;
 }
 
@@ -234,10 +238,12 @@ int main()
 	queue<pair<int,int> > arcs;
 	queue<pair<int,int> > arcs2;
 	fin.open("input.txt");
+	fout.open("output.txt");
 	int a;
 	vector<vector<int> > graph(n,vector<int> (n));
 	vector<int> v;
 	cout<<"Enter Graph : "<<endl;
+	fout<<n<<endl;
 	for(i=0;i<n;i++)
 	{
 		for(j=0;j<n;j++)
@@ -246,7 +252,10 @@ int main()
 			if(a==1)
 				arcs.push(make_pair(i,j));
 			graph[i][j] = a;
+			fout<<a;
+			fout<<" ";
 		}
+		fout<<endl;
 	}
 	int k = arcs.size()/2;
 	for(i=0;i<k;i++)
