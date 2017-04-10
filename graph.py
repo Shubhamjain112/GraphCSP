@@ -16,12 +16,18 @@ for i in range(n):
 		if i>j and graph[i][j]=='1':
 			g.add_edges([(i,j)]);
 
+
+j=1
 color = f.readline().strip().split(' ')
-col_dict = {"1" : "red","2" : "green","3" : "blue"}
-i=0
-g.vs["color"] = [col_dict[color[i]] for i in range(n)]
-i=0
-g.vs["name"] = [i+1 for i in range(n)]
-g.vs["label"] = g.vs["name"]
-layout = g.layout("kk")
-plot(g, layout = layout)
+while color!="":
+	col_dict = {"1" : "red","2" : "green","3" : "blue"}
+	i=0
+	g.vs["color"] = [col_dict[color[i]] for i in range(n)]
+	i=0
+	g.vs["name"] = [i+1 for i in range(n)]
+	g.vs["label"] = g.vs["name"]
+	layout = g.layout("kk")
+	plot(g, layout = layout)
+	plot(g, "graph"+str(j)+".png")
+	color = f.readline().strip().split(' ')
+	j=j+1

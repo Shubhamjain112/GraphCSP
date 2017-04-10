@@ -8,6 +8,8 @@
 #include <ctime>
 #include <sys/time.h>
 #include <queue>
+#include <ctime>
+#include <sys/timeb.h>
 using namespace std;
 
 int V ;
@@ -177,27 +179,103 @@ bool BTM(vector<vector<int> > &graph, int m,vector<vector<int> > &domains,queue<
     printSolution(color);
     return true;
 }
+
 /*---------------------------------------------------------------------------------------------------------------------------------------------*/
 
-bool min_conflicts(vector<vector<int> > &graph, int m,vector<vector<int> > &domains)
+int get_conflicts(vector<vector<int> > &graph, int color[]) {
+
+	int n = graph.size();
+	int conflicts = 0;
+	for(int i = 0;i < n; i++) {
+		for(int j = 0;j< n; j++) {
+			if(graph[i][j] == 1 && color[i] !=0 && color[j] !=0 && color[i] == color[j]){
+				conflicts++;
+			}
+		}
+	}
+	return conflicts;
+
+}
+
+/*---------------------------------------------------------------------------------------------------------------------------------------------*/
+
+bool min_conflicts(vector<vector<int> > &graph, int m, int color[],vector<vector<int> > &domains)
 {
+	int n = graph.size();
+	int max_steps = 100;
+
+	// initial random color assignment
+	for (int i = 0;i < n;i++) {
+		int c = rand()%m ;
+		//cout<< c << endl;
+		color[i] = domains[i][c];
+	}
+	//printSolution(color);
+
+	bool visited[n];
+	for(int i = 0; i < n;i++) {
+		visited[i] = false;
+	}
+
+	while(max_steps--) {
+		int v = rand()%n;
+
+		//while(visited[v]) {
+		//	v = rand()%n;
+		//}
+		//cout << v << " ";
+		int min_conflicts = 999;
+		int final_color;
+
+		for(int j = 0;j < m;j++) {
+			color[v] = domains[v][j];
+			int conflicts_here = get_conflicts(graph, color);
+			if(conflicts_here < min_conflicts){
+				final_color = domains[v][j];
+				min_conflicts = conflicts_here;
+			}
+			color[v] = 0;
+		}
+
+		//cout
+		color[v] = final_color;
+		visited[v] = true;
+
+	}
+
+	printSolution(color);
+	return true;
 }
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------*/
  
-bool graphColoringUtil(vector<vector<int> > &graph, int m, int color[], int v)
+bool graphColoringUtil(vector<vector<int> > &graph, int m, vector<vector<int> > &domains,int color[], int colored)
 {
 	V = graph.size();
-    if (v == V)
+    if (colored == V)
         return true;
 
-    for (int c = 1; c <= m; c++)
+    int min_remaining = 999;
+    int v = V + 1;
+    for(int i = 0;i < V;i++) 
     {
+    	int curr_remaining = domains[i].size();
+    	if(curr_remaining < min_remaining && color[i] == 0)
+    	{
+    		min_remaining = curr_remaining;
+    		v = i;
+    	} 
+    }
+
+    for (int i = 0; i < domains[v].size(); i++)
+    {		
+    	int c = domains[v][i];
+
         if (isSafe(v, graph, color, c))
         {
            color[v] = c;
 
-           if (graphColoringUtil (graph, m, color, v+1) == true)
+           if (graphColoringUtil (graph, m, domains,color, colored+1) == true)
              return true;
 
            color[v] = 0;
@@ -207,15 +285,17 @@ bool graphColoringUtil(vector<vector<int> > &graph, int m, int color[], int v)
     return false;
 }
 
-bool BT(vector<vector<int> > &graph, int m)
+bool BT(vector<vector<int> > &graph, int m, vector<vector<int> > &domains)
 {
   
   	V = graph.size();
     int *color = new int[V];
     for (int i = 0; i < V; i++)
        color[i] = 0;
- 
-    if (graphColoringUtil(graph, m, color, 0) == false)
+ 	
+ 	int colored = 0;
+
+    if (graphColoringUtil(graph, m, domains,color, colored) == false)
     {
       cout<<"Solution doesnt exists";
       return false;
@@ -226,20 +306,25 @@ bool BT(vector<vector<int> > &graph, int m)
 }
 /*---------------------------------------------------------------------------------------------------------------------------------------------*/
 
-
 int main()
 {
 	vector<vector<int> > domains;
-	timeval tv1;
-	timeval tv2;
 	int i,j,t;
-	int n = 6;
+	int n ;
+	int x,y;
+	for(i=0;i<n;i++)
+	{
+		x = rand()%1000;
+		y = rand()%1000;
+
+	}
 	fstream fin;
 	queue<pair<int,int> > arcs;
 	queue<pair<int,int> > arcs2;
 	fin.open("input.txt");
 	fout.open("output.txt");
 	int a;
+	fin>>n;
 	vector<vector<int> > graph(n,vector<int> (n));
 	vector<int> v;
 	cout<<"Enter Graph : "<<endl;
@@ -290,19 +375,28 @@ int main()
 		cin>>t;
 		if(t==1)
 		{
-			BT(graph,m);
+  			clock_t Start = clock();
+			BT(graph,m,domains);
+			cout << "Time Difference: " << clock() - Start <<" milliseconds"<< endl;
 		}
 		else if(t==2)
 		{
+			clock_t Start = clock();
 			BTF(graph,m,domains);
+			cout << "Time Difference: " << clock() - Start <<" milliseconds"<< endl;
 		}
 		else if(t==3)
 		{
+			clock_t Start = clock();
 			BTM(graph,m,domains,arcs2);
+			cout << "Time Difference: " << clock() - Start <<" milliseconds"<< endl;	
 		}
 		else if(t==4)
 		{
-			min_conflicts(graph,m,domains);
+			clock_t Start = clock();
+			int *color = new int[graph.size()];
+			min_conflicts(graph,m,color,domains);
+			cout << "Time Difference: " << clock() - Start <<" milliseconds"<< endl;
 		}
 		else if(t==5)
 		{
